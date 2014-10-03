@@ -1,23 +1,27 @@
 package;
 
+import kha.Color;
 import kha.Configuration;
 import kha.Font;
 import kha.FontStyle;
+import kha.Framebuffer;
 import kha.Game;
+import kha.graphics2.Graphics;
 import kha.Image;
 import kha.Loader;
-import kha.Painter;
+import kha.LoadingScreen;
+import kha.math.Vector2;
 import kha.Sprite;
-import kha.Vector2;
 import kha.Video;
+
 using StringTools;
 
 class FormPainter {
-	private var painter: Painter;
+	private var painter: Graphics;
 	public var resx: Float;
 	public var resy: Float;
 	
-	public function new(painter: Painter, resx: Float, resy: Float) {
+	public function new(painter: Graphics, resx: Float, resy: Float) {
 		this.painter = painter;
 		this.resx = resx;
 		this.resy = resy;
@@ -28,11 +32,11 @@ class FormPainter {
 	}
 	
 	public function drawImage2(image : Image, sx : Float, sy : Float, sw : Float, sh : Float, dx : Float, dy : Float, dw : Float, dh : Float) : Void {
-		painter.drawImage2(image, sx * image.getWidth(), sy * image.getWidth(), sw * image.getWidth(), sh * image.getHeight(), dx * resx, dy * resy, dw * resx, dh * resy);
+		painter.drawScaledSubImage(image, sx * image.width, sy * image.height, sw * image.width, sh * image.height, dx * resx, dy * resy, dw * resx, dh * resy);
 	}
 	
 	public function setColor(r : Int, g : Int, b : Int) : Void {
-		painter.setColor(r, g, b);
+		painter.color = Color.fromBytes(r, g, b);
 	}
 	
 	public function drawRect(x : Float, y : Float, width : Float, height : Float) : Void {
@@ -44,7 +48,7 @@ class FormPainter {
 	}
 	
 	public function setFont(font : Font) : Void {
-		painter.setFont(font);
+		painter.font = font;
 	}
 	
 	public function drawChars(text : String, offset : Int, length : Int, x : Float, y : Float) : Void {
@@ -263,12 +267,20 @@ class Diagrams extends Game {
 	
 	public function new() {
 		super("Diagrams", false);
+	}
+	
+	public override function init(): Void {
+		Configuration.setScreen(new LoadingScreen());
+		Loader.the.loadRoom("start", loaded);
+	}
+	
+	private function loaded(): Void {
+		Configuration.setScreen(this);
+		
 		forms = new Array<Form>();
 		Rect.init();
 		Text.init();
-	}
-	
-	override public function loadFinished(): Void {
+		
 		var game = new Rect(0.45, 0.025, 0.1, 0.1, "Game/App");
 		var gameBottom = new Vector2(0.5, 0.125);
 		var khaLibsTop = new Vector2(0.5, 0.15);
@@ -283,8 +295,8 @@ class Diagrams extends Game {
 		var haxeCompilerBottom = new Vector2(0.4, 0.4 + 0.1);
 		var kgCompilerTop = new Vector2(0.6, 0.4);
 		var kgCompilerBottom = new Vector2(0.6, 0.4 + 0.1);
-		var haxeCompiler = new Rect(haxeCompilerTop.x - 0.05, haxeCompilerTop.y, 0.1, 0.1, "Haxe Compiler");
-		var kgCompiler = new Rect(kgCompilerTop.x - 0.05, kgCompilerTop.y, 0.1, 0.1, "Kg Compiler");
+		var haxeCompiler = new Rect(haxeCompilerTop.x - 0.05, haxeCompilerTop.y, 0.1, 0.1, "Haxe");
+		var kgCompiler = new Rect(kgCompilerTop.x - 0.05, kgCompilerTop.y, 0.1, 0.1, "krafix");
 		
 		var languagesTop = 0.6;
 		var languagesBottom = 0.7;
@@ -301,11 +313,11 @@ class Diagrams extends Game {
 		
 		var khaBackends = new Rect(0.025, 0.75, 0.95, 0.1, "Kha-Backends");
 		
-		var kt = new Rect(0.01, 0.1, 0.3, 0.8, "Kt");
-		kt.add(new Rect(0.05, 0.05, 0.4, 0.4, "Direct3D 9"));
-		kt.add(new Rect(0.05, 0.55, 0.4, 0.4, "Direct3D 11"));
-		kt.add(new Rect(0.95 - 0.4, 0.05, 0.4, 0.4, "OpenGL"));
-		kt.add(new Rect(0.95 - 0.4, 0.55, 0.4, 0.4, "LibCGM"));
+		var kt = new Rect(0.01, 0.1, 0.3, 0.8, "Kore");
+		kt.add(new Rect(0.05, 0.05, 0.35, 0.4, "Direct3D 9"));
+		kt.add(new Rect(0.05, 0.55, 0.35, 0.4, "Direct3D 11"));
+		kt.add(new Rect(0.95 - 0.35, 0.05, 0.35, 0.4, "OpenGL"));
+		kt.add(new Rect(0.95 - 0.35, 0.55, 0.35, 0.4, "LibCGM"));
 		khaBackends.add(kt);
 		
 		khaBackends.add(new Rect(0.33, 0.1, 0.1, 0.4, "WebGL"));
@@ -342,7 +354,7 @@ class Diagrams extends Game {
 		forms.push(agal);
 		forms.push(khaBackends);
 		
-		var texts = ["Xbox 360", "PlayStation 3", "Windows", "OS X", "iOS", "Android", "Windows RT", "C#/WPF", "XNA", "Java/AWT", "Linux", "Flash", "HTML5", "PlayStation Mobile", "Dreamcast"];
+		var texts = ["Xbox 360", "PlayStation 3", "Windows", "OS X", "iOS", "Android", "Windows RT", "C#/WPF", "XNA", "Java/AWT", "Linux", "Flash", "HTML5", "PlayStation Mobile", "Tizen"];
 		for (i in 0...texts.length) {
 			forms.push(new Text(0.05 + i * 0.9 / (texts.length - 1), (i % 2 == 0) ? 0.94 : 0.98, texts[i]));
 		}
@@ -359,14 +371,17 @@ class Diagrams extends Game {
 		var svg = painter.svg;
 	}
 	
-	override public function render(painter: Painter): Void {
-		painter.translate(0, 0);
-		painter.setColor(255, 255, 255);
-		painter.clear();
-		var formPainter = new FormPainter(painter, Game.the.width, Game.the.height);
+	override public function render(frame: Framebuffer): Void {
+		var g = frame.g2;
+		g.begin();
+		g.translate(0, 0);
+		g.color = Color.White;
+		g.clear(Color.White);
+		var formPainter = new FormPainter(g, Game.the.width, Game.the.height);
 		for (form in forms) {
 			renderForm(formPainter, form, 0, 0, Game.the.width, Game.the.height);
 		}
+		g.end();
 	}
 	
 	private function renderForm(painter: FormPainter, form: Form, x: Float, y: Float, resx: Float, resy: Float) {
