@@ -1,10 +1,11 @@
 package;
 
-import kha.Starter;
+import kha.System;
 
 class Main {
 	public static function main() {
-		var starter = new Starter();
-		starter.start(new Diagrams());
+		System.init("Diagrams", 1024, 768, function () {
+			new Diagrams();
+		});
 	}
 }

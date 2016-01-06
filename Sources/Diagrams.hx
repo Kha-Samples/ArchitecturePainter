@@ -1,17 +1,14 @@
 package;
 
+import kha.Assets;
 import kha.Color;
-import kha.Configuration;
 import kha.Font;
 import kha.FontStyle;
 import kha.Framebuffer;
-import kha.Game;
 import kha.graphics2.Graphics;
 import kha.Image;
-import kha.Loader;
-import kha.LoadingScreen;
 import kha.math.Vector2;
-import kha.Sprite;
+import kha.System;
 import kha.Video;
 
 using StringTools;
@@ -76,7 +73,7 @@ class FormPainter {
 	}
 	
 	public function clear() : Void {
-		painter.fillRect(0, 0, Game.the.width, Game.the.height);
+		painter.fillRect(0, 0, resx, resy);
 	}
 }
 
@@ -147,7 +144,7 @@ class SvgPainter extends FormPainter {
 		//painter.fillRect(0, 0, Game.the.width, Game.the.height);
 		svg = '<?xml version="1.0" standalone="no" ?>\n';
 		svg += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">\n';
-		svg += '<svg width="' + Game.the.width + '" height="' + Game.the.height + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+		svg += '<svg width="' + resx + '" height="' + resy + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
 	}
 }
 
@@ -170,9 +167,11 @@ class Form {
 class Rect extends Form {
 	private var title: String;
 	private static var font: Font;
+	private static var fontSize: Int;
 	
 	public static function init(): Void {
-		font = Loader.the.loadFont("Arial", new FontStyle(false, false, false), 15);
+		font = Assets.fonts.LiberationSans_Regular;
+		fontSize = 15;
 	}
 	
 	public function new(x: Float, y: Float, width: Float, height: Float, title: String) {
@@ -196,8 +195,8 @@ class Rect extends Form {
 		
 		painter.setColor(0, 0, 0);
 		painter.setFont(font);
-		var titleWidth = font.stringWidth(title) / painter.resx;
-		var titleHeight = font.getHeight() / painter.resy;
+		var titleWidth = font.width(fontSize, title) / painter.resx;
+		var titleHeight = font.height(fontSize) / painter.resy;
 		painter.drawString(title, width / 2 - titleWidth / 2, height / 2 - titleHeight / 2);
 	}
 }
@@ -205,9 +204,11 @@ class Rect extends Form {
 class Text extends Form {
 	private var title: String;
 	private static var font: Font;
+	private static var fontSize: Int;
 	
 	public static function init(): Void {
-		font = Loader.the.loadFont("Arial", new FontStyle(false, false, false), 15);
+		font = Assets.fonts.LiberationSans_Regular;
+		fontSize = 15;
 	}
 	
 	public function new(x: Float, y: Float, title: String) {
@@ -224,8 +225,8 @@ class Text extends Form {
 	override public function render(painter: FormPainter): Void {
 		painter.setColor(0, 0, 0);
 		painter.setFont(font);
-		var titleWidth = font.stringWidth(title) / painter.resx;
-		var titleHeight = font.getHeight() / painter.resy;
+		var titleWidth = font.width(fontSize, title) / painter.resx;
+		var titleHeight = font.height(fontSize) / painter.resy;
 		painter.drawString(title, -titleWidth / 2, -titleHeight / 2);
 	}
 }
@@ -262,21 +263,19 @@ class Arrow extends Form {
 	}
 }
 
-class Diagrams extends Game {
+class Diagrams {
 	private var forms: Array<Form>;
+	private var width = 1024;
+	private var height = 768;
 	
 	public function new() {
-		super("Diagrams", false);
-	}
-	
-	public override function init(): Void {
-		Configuration.setScreen(new LoadingScreen());
-		Loader.the.loadRoom("start", loaded);
+		Assets.loadEverything(function () {
+			System.notifyOnRender(render);
+			loaded();
+		});
 	}
 	
 	private function loaded(): Void {
-		Configuration.setScreen(this);
-		
 		forms = new Array<Form>();
 		Rect.init();
 		Text.init();
@@ -358,28 +357,30 @@ class Diagrams extends Game {
 		for (i in 0...texts.length) {
 			forms.push(new Text(0.05 + i * 0.9 / (texts.length - 1), (i % 2 == 0) ? 0.94 : 0.98, texts[i]));
 		}
+		
+		update();
 	}
 	
-	override public function update(): Void {
-		var painter = new SvgPainter(Game.the.width, Game.the.height);
+	private function update(): Void {
+		var painter = new SvgPainter(width, height);
 		painter.translate(0, 0);
 		painter.clear();
 		for (form in forms) {
-			renderForm(painter, form, 0, 0, Game.the.width, Game.the.height);
+			renderForm(painter, form, 0, 0, width, height);
 		}
 		painter.svg += '</svg>';
 		var svg = painter.svg;
 	}
 	
-	override public function render(frame: Framebuffer): Void {
+	private function render(frame: Framebuffer): Void {
 		var g = frame.g2;
 		g.begin();
 		g.translate(0, 0);
 		g.color = Color.White;
 		g.clear(Color.White);
-		var formPainter = new FormPainter(g, Game.the.width, Game.the.height);
+		var formPainter = new FormPainter(g, width, height);
 		for (form in forms) {
-			renderForm(formPainter, form, 0, 0, Game.the.width, Game.the.height);
+			renderForm(formPainter, form, 0, 0, width, height);
 		}
 		g.end();
 	}
