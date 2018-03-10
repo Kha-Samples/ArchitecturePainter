@@ -3,10 +3,10 @@ package;
 import kha.Assets;
 import kha.Color;
 import kha.Font;
-import kha.FontStyle;
 import kha.Framebuffer;
 import kha.graphics2.Graphics;
 import kha.Image;
+import kha.math.FastMatrix3;
 import kha.math.Vector2;
 import kha.System;
 import kha.Video;
@@ -306,8 +306,8 @@ class Diagrams {
 		var cs = new Rect(0.45 - 0.025, languagesTop, 0.1, 0.1, "C#");
 		
 		var glsl = new Rect(0.6 - 0.025, languagesTop, 0.1, 0.1, "GLSL");
-		var glsles = new Rect(0.7 - 0.025, languagesTop, 0.1, 0.1, "GLSL/ES");
-		var hlsl = new Rect(0.8 - 0.025, languagesTop, 0.1, 0.1, "HLSL/Cg");
+		var glsles = new Rect(0.7 - 0.025, languagesTop, 0.1, 0.1, "Metal");
+		var hlsl = new Rect(0.8 - 0.025, languagesTop, 0.1, 0.1, "HLSL");
 		var agal = new Rect(0.9 - 0.025, languagesTop, 0.1, 0.1, "AGAL");
 		
 		var khaBackends = new Rect(0.025, 0.75, 0.95, 0.1, "Kha-Backends");
@@ -353,7 +353,7 @@ class Diagrams {
 		forms.push(agal);
 		forms.push(khaBackends);
 		
-		var texts = ["Xbox 360", "PlayStation 3", "Windows", "OS X", "iOS", "Android", "Windows RT", "C#/WPF", "XNA", "Java/AWT", "Linux", "Flash", "HTML5", "PlayStation Mobile", "Tizen"];
+		var texts = ["Xbox One", "PlayStation 4", "Switch", "Windows", "macOS", "iOS", "Android", "Windows Universal", "C#/WPF", "XNA", "Java/AWT", "Linux", "Flash", "HTML5", "Tizen"];
 		for (i in 0...texts.length) {
 			forms.push(new Text(0.05 + i * 0.9 / (texts.length - 1), (i % 2 == 0) ? 0.94 : 0.98, texts[i]));
 		}
@@ -380,6 +380,7 @@ class Diagrams {
 		g.clear(Color.White);
 		var formPainter = new FormPainter(g, width, height);
 		for (form in forms) {
+			g.transformation = FastMatrix3.identity();
 			renderForm(formPainter, form, 0, 0, width, height);
 		}
 		g.end();

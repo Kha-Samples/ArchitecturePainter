@@ -1,7 +1,7 @@
-var project = new Project('Diagrams');
+let project = new Project('Diagrams');
 
 project.addAssets('Assets/**');
 
 project.addSources('Sources');
 
-return project;
+resolve(project);
