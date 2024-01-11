@@ -14,7 +14,7 @@ import kha.Video;
 using StringTools;
 
 class FormPainter {
-	private var painter: Graphics;
+	var painter: Graphics;
 	public var resx: Float;
 	public var resy: Float;
 	
@@ -79,8 +79,8 @@ class FormPainter {
 
 class SvgPainter extends FormPainter {
 	public var svg: String;
-	private var tx: Float;
-	private var ty: Float;
+	var tx: Float;
+	var ty: Float;
 	
 	public function new(resx: Float, resy: Float) {
 		super(null, resx, resy);
@@ -118,7 +118,7 @@ class SvgPainter extends FormPainter {
 	
 	override public function drawString(text : String, x : Float, y : Float) : Void {
 		//painter.drawString(text, x * resx, y * resy);
-		svg += '<text x="' + (tx + x * resx) + '" y="' + (ty + y * resy + 15) + '">' + text.replace('<', '&lt;').replace('>', '&gt;') + '</text>\n';
+		svg += '<text x="' + (tx + x * resx) + '" y="' + (ty + y * resy + 15) + '">' + text.replace("<", "&lt;").replace(">", "&gt;") + "</text>\n";
 	}
 	
 	override public function drawLine(x1 : Float, y1 : Float, x2 : Float, y2 : Float) : Void {
@@ -131,7 +131,7 @@ class SvgPainter extends FormPainter {
 	
 	override public function fillTriangle(x1 : Float, y1 : Float, x2 : Float, y2 : Float, x3 : Float, y3 : Float) : Void {
 		//painter.fillTriangle(x1 * resx, y1 * resy, x2 * resx, y2 * resy, x3 * resx, y3 * resy);
-		svg += '<path d = "M ' + (tx + x1 * resx) + ' ' + (ty + y1 * resy) + ' L ' + (tx + x2 * resx) + ' ' + (ty + y2 * resy) + ' L ' + (tx + x3 * resx) + ' ' + (ty + y3 * resy) + ' L ' + (tx + x1 * resx) + ' ' + (ty + y1 * resy) + '" stroke = "none" stroke-width = "3" fill = "red"/>\n';
+		svg += '<path d = "M ' + (tx + x1 * resx) + " " + (ty + y1 * resy) + " L " + (tx + x2 * resx) + " " + (ty + y2 * resy) + " L " + (tx + x3 * resx) + " " + (ty + y3 * resy) + " L " + (tx + x1 * resx) + " " + (ty + y1 * resy) + '" stroke = "none" stroke-width = "3" fill = "red"/>\n';
 	}
 	
 	override public function translate(x : Float, y : Float) : Void {
@@ -165,9 +165,9 @@ class Form {
 }
 
 class Rect extends Form {
-	private var title: String;
-	private static var font: Font;
-	private static var fontSize: Int;
+	var title: String;
+	static var font: Font;
+	static var fontSize: Int;
 	
 	public static function init(): Void {
 		font = Assets.fonts.LiberationSans_Regular;
@@ -202,9 +202,9 @@ class Rect extends Form {
 }
 
 class Text extends Form {
-	private var title: String;
-	private static var font: Font;
-	private static var fontSize: Int;
+	var title: String;
+	static var font: Font;
+	static var fontSize: Int;
 	
 	public static function init(): Void {
 		font = Assets.fonts.LiberationSans_Regular;
@@ -232,8 +232,8 @@ class Text extends Form {
 }
 
 class Arrow extends Form {
-	private var start: Vector2;
-	private var end: Vector2;
+	var start: Vector2;
+	var end: Vector2;
 	
 	public function new(xstart: Float, ystart: Float, xend: Float, yend: Float) {
 		super();
@@ -264,9 +264,9 @@ class Arrow extends Form {
 }
 
 class Diagrams {
-	private var forms: Array<Form>;
-	private var width = 1024;
-	private var height = 768;
+	var forms: Array<Form>;
+	var width = 1024;
+	var height = 768;
 	
 	public function new() {
 		Assets.loadEverything(function () {
@@ -275,8 +275,8 @@ class Diagrams {
 		});
 	}
 	
-	private function loaded(): Void {
-		forms = new Array<Form>();
+	function loaded() {
+		forms = [];
 		Rect.init();
 		Text.init();
 		
@@ -361,18 +361,18 @@ class Diagrams {
 		update();
 	}
 	
-	private function update(): Void {
+	function update() {
 		var painter = new SvgPainter(width, height);
 		painter.translate(0, 0);
 		painter.clear();
 		for (form in forms) {
 			renderForm(painter, form, 0, 0, width, height);
 		}
-		painter.svg += '</svg>';
+		painter.svg += "</svg>";
 		var svg = painter.svg;
 	}
 	
-	private function render(frame: Framebuffer): Void {
+	function render(frame: Framebuffer) {
 		var g = frame.g2;
 		g.begin();
 		g.translate(0, 0);
@@ -386,7 +386,7 @@ class Diagrams {
 		g.end();
 	}
 	
-	private function renderForm(painter: FormPainter, form: Form, x: Float, y: Float, resx: Float, resy: Float) {
+	function renderForm(painter: FormPainter, form: Form, x: Float, y: Float, resx: Float, resy: Float) {
 		painter.translate(x + form.x * resx, y + form.y * resy);
 		form.render(painter);
 		var resx = painter.resx;
